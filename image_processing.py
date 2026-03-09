@@ -2,66 +2,61 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-# membaca gambar
-image = cv2.imread("gambar.jpg")
+img = cv2.imread("gambar.jpg")
 
-# ubah ke grayscale
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-# =========================
-# 1. HISTOGRAM EQUALIZATION
-# =========================
-hist_eq = cv2.equalizeHist(gray)
+equalized = cv2.equalizeHist(gray)
 
-# =========================
-# 2. SPATIAL SMOOTHING
-# =========================
+avg_blur = cv2.blur(gray, (5,5))
 
-# Average filter (Lowpass)
-smooth_avg = cv2.blur(gray, (5,5))
+median_blur = cv2.medianBlur(gray, 5)
 
-# Median filter
-smooth_median = cv2.medianBlur(gray, 5)
-
-# =========================
-# 3. SPATIAL SHARPENING
-# =========================
-
-# Kernel sharpening
 kernel_sharpen = np.array([
     [0,-1,0],
     [-1,5,-1],
     [0,-1,0]
 ])
 
-sharpen = cv2.filter2D(gray, -1, kernel_sharpen)
+sharpened = cv2.filter2D(gray, -1, kernel_sharpen)
 
-# =========================
-# MENAMPILKAN HASIL
-# =========================
+sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
+sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
 
-titles = [
-    "Original",
-    "Histogram Equalization",
-    "Smoothing Average",
-    "Median Filter",
-    "Sharpening"
-]
+sobel = cv2.magnitude(sobelx, sobely)
+sobel = cv2.convertScaleAbs(sobel)
 
-images = [
-    gray,
-    hist_eq,
-    smooth_avg,
-    smooth_median,
-    sharpen
-]
+plt.figure(figsize=(10,6))
 
-plt.figure(figsize=(12,6))
+plt.subplot(2,3,1)
+plt.title("Original")
+plt.imshow(gray, cmap='gray')
+plt.axis("off")
 
-for i in range(5):
-    plt.subplot(2,3,i+1)
-    plt.imshow(images[i], cmap="gray")
-    plt.title(titles[i])
-    plt.axis("off")
+plt.subplot(2,3,2)
+plt.title("Equalized")
+plt.imshow(equalized, cmap='gray')
+plt.axis("off")
 
+plt.subplot(2,3,3)
+plt.title("Avg Blur")
+plt.imshow(avg_blur, cmap='gray')
+plt.axis("off")
+
+plt.subplot(2,3,4)
+plt.title("Median Blur")
+plt.imshow(median_blur, cmap='gray')
+plt.axis("off")
+
+plt.subplot(2,3,5)
+plt.title("Sharpened")
+plt.imshow(sharpened, cmap='gray')
+plt.axis("off")
+
+plt.subplot(2,3,6)
+plt.title("Sobel")
+plt.imshow(sobel, cmap='gray')
+plt.axis("off")
+
+plt.tight_layout()
 plt.show()
